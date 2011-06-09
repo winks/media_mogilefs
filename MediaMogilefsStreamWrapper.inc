@@ -28,6 +28,9 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     {
         if(!isset($this->_m['hosts'])) {
             $this->_m['hosts'] = variable_get('media_mogilefs_hosts', '');
+            if (!is_array($this->_m['hosts'])) {
+                $this->_m['hosts'] = explode(';', $this->_m['hosts']);
+            }
         }
         if(!isset($this->_m['domain'])) {
             $this->_m['domain'] = variable_get('media_mogilefs_domain', '');
@@ -40,11 +43,11 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     public function setUri($uri)
     {
         $this->_uri = $uri;
-        printf("uri is $uri".PHP_EOL);
+        error_log("uri is $uri".PHP_EOL);
         $parts = explode('/', $uri);
         $base = explode('\.', array_pop($parts));
-        $this->_key = $base[0];
-        printf("key is $this->_key ".PHP_EOL);
+        $this->_key = $base[0]."";
+        error_log("key is $this->_key ".PHP_EOL);
     }
 
     public function getUri()
@@ -56,7 +59,13 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     public function getExternalUrl()
     {
         // $proto $host $key $size $ext
-        $path = '%s://%s/%s_%s.%s';
+        $path = '%s/%s/%s';
+        return sprintf(
+            $path,
+            $GLOBALS['base_url'],
+            'mog',
+            $this->_key
+        );
     }
 
     //@TODO
@@ -97,7 +106,7 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
         $this->setUri($uri);
         if ($this->_getMogileClient()) {
             $this->_pos = 0;
-            printf("opened $uri".PHP_EOL);
+            error_log("opened $uri".PHP_EOL);
             return true;
         }
     }
@@ -117,7 +126,7 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     public function stream_read($count)
     {
         if ($this->_getMogileClient()) {
-            printf("reading $this->_pos $count".PHP_EOL);
+            error_log("reading $this->_pos $count".PHP_EOL);
             $data = substr($this->_getObject(), $this->_pos, $count);
             $this->_pos += $count;
             return $data;
@@ -129,8 +138,12 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     {
         //@TODO
         if ($this->_getMogileClient() && strlen($data) > 0) {
-            printf("putting to key $this->_key".PHP_EOL);
-            $this->_getMogileClient()->storeData($this->_key, $this->_m['class'], $data);
+            error_log("putting to key $this->_key".PHP_EOL);
+            try {
+                $this->_getMogileClient()->storeData($this->_key, $this->_m['class'], $data);
+            } catch (Exception $e) {
+                return 0;
+            }
             return strlen($data);
         }
         return false;
@@ -202,7 +215,7 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
 
     public function mkdir($uri, $mode, $options)
     {
-        return false;
+        return true;
     }
 
     public function rmdir($uri, $options)
@@ -238,7 +251,11 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
 
     protected function _getObject() {
         if (!$this->_object) {
-            $this->_object = $this->_mog->getFileData($this->_key);
+            try {
+                $this->_object = $this->_mog->getFileData($this->_key);
+            } catch (Exception $e) {
+                return null;
+            }
         }
         return $this->_object;
     }
