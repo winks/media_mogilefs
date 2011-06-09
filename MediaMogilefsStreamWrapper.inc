@@ -60,6 +60,7 @@ class MediaMogilefsStreamWrapper implements DrupalStreamWrapperInterface
     {
         // $proto $host $key $size $ext
         $path = '%s/%s/%s';
+        return $GLOBALS['base_url'].'/image.php?key='.$this->_key;
         return sprintf(
             $path,
             $GLOBALS['base_url'],
