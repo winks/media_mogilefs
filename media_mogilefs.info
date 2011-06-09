@@ -1,0 +1,6 @@
+name = MogileFS wrapper
+description = Store files in MogileFS
+package = Media
+core = 7.x
+files[] = media_mogilefs.module
+files[] = MediaMogilefsStreamWrapper.inc

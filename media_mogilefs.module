@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * Implements hook_stream_wrappers().
+ */
+function media_mogilefs_stream_wrappers()
+{
+    return array(
+        'mogilefs' => array(
+            'name' => t('MogileFS files'),
+            'class' => 'MediaMogilefsStreamWrapper',
+            'description' => t('Files served by MogileFS.'),
+        )
+    );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function media_mogilefs_menu()
+{
+    $items = array();
+
+    $items['admin/config/media/mogilefs'] => array(
+        'title' => 'MogileFS',
+        'description' => 'Configure your MogileFS settings',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('media_mogilefs_admin'),
+        'access arguments' => array('access administration pages'),
+    );
+}
+
+/**
+ * Implements hook_admin().
+ */
+function media_mogilefs_admin()
+{
+    $form = array();
+
+    $form['media_mogilefs_hosts'] = array(
+        '#type' =>          'textfield',
+        '#title' =>         t('MogileFS hosts'),
+        '#default_value'    => variable_get('media_mogilefs_hosts', ''),
+        '#required'         => true,
+    );
+    $form['media_mogilefs_class'] = array(
+        '#type' =>          'textfield',
+        '#title' =>         t('MogileFS class'),
+        '#default_value'    => variable_get('media_mogilefs_class', ''),
+        '#required'         => true,
+    );
+    $form['media_mogilefs_domain'] = array(
+        '#type' =>          'textfield',
+        '#title' =>         t('MogileFS domain'),
+        '#default_value'    => variable_get('media_mogilefs_domain', ''),
+        '#required'         => true,
+    );
+
+    return system_settings_form($form);
+}
