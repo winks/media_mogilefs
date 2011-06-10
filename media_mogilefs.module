@@ -60,37 +60,3 @@ function media_mogilefs_admin()
 
     return system_settings_form($form);
 }
-
-function media_mogilefs_boot2()
-{ }
-
-function media_mogilefs_url_inbound_alter2(&$result, $path, $path_language)
-{
-    // Create the path user/me/edit, which allows a user to edit their account.
-    if (preg_match('|^user/me/edit(/.*)?|', $path, $matches)) {
-        global $user;
-        $result = 'user/' . $user->uid . '/edit' . $matches[1];
-        file_put_contents('/tmp/xxa', json_encode(array($result, $path, $matches)).PHP_EOL);
-    }
-    // mogile
-    if (preg_match('(^mog/(.*))', $path, $matches)) {
-        $result = 'image.php?key='.$matches[1];
-        file_put_contents('/tmp/xxx', json_encode(array($result, $path, $matches)).PHP_EOL);
-    }
-}
-function media_mogilefs_url_outbound_alter2(&$path, &$options, $original_path)
-{
-    // Instead of pointing to user/[uid]/edit, point to user/me/edit.
-    if (preg_match('|^user/([0-9]*)/edit(/.*)?|', $path, $matches)) {
-        global $user;
-        if ($user->uid == $matches[1]) {
-            $path = 'user/me/edit' . $matches[2];
-            file_put_contents('/tmp/xxb', json_encode(array($path, $matches)).PHP_EOL);
-        }
-    }
-    // mogile
-    if (preg_match('(^morg/(.*))', $path, $matches)) {
-        $path = 'image.php?key='.$matches[1];
-        file_put_contents('/tmp/xxy', json_encode(array($path, $matches)).PHP_EOL);
-    }
-}

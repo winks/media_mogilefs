@@ -1,1 +1,13 @@
 MogileFS wrapper for Drupal 7.x
+
+Howto
+=====
+
+- put into sites/all/modules
+- go to admin/modules and enable it
+- go to admin/config/media/mogilefs and insert (without ")
+  * hosts in the format: "192.168.0.20:7001;192.168.0.21:7001"
+  * class like "foobar"
+  * domain like "foobar"
+- the scheme is called mogilefs://
+
